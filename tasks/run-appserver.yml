@@ -116,4 +116,4 @@
   file:
     state: absent
     path: "{{ prev_stat.lnk_source }}"
-  when: prev_stat.exists == "True"
+  when: prev_stat.exists is defined and prev_stat.exists == "True"
