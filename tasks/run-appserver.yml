@@ -92,6 +92,9 @@
     path: "{{ app_prev_build_link }}"
   register: prev_stat
 
+- debug:
+    msg: "{{ prev_stat }}"
+
 - name: Removing prev symlink
   file:
     state: absent
