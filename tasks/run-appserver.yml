@@ -88,6 +88,10 @@
     path: "{{ app_next_build_link }}"
     src: "{{ app_target }}"
 
+- stat:
+    path: "{{ app_prev_build_link }}"
+  register: prev_stat
+
 - name: Removing prev symlink
   file:
     state: absent
@@ -107,3 +111,9 @@
   when: app.post_publish_commands is defined
   args:
     chdir: "{{ app_target }}"
+
+- name: Cleanup previous build
+  file:
+    state: absent
+    path: "{{ prev_stat.lnk_source }}"
+  when: prev_stat.exists == "True"
