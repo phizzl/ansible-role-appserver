@@ -115,5 +115,5 @@
 - name: Cleanup previous build
   file:
     state: absent
-    path: "{{ prev_stat.lnk_source }}"
+    path: "{{ prev_stat.stat.lnk_source }}"
   when: prev_stat.stat.exists is defined and prev_stat.stat.exists == true
