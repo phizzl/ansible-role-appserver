@@ -3,5 +3,6 @@ galaxy_info:
   role_name: appserver
   author: phizzl
   description: Role to deploy (web) applications
+  license: "MIT"
 
 dependencies: []
