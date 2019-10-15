@@ -116,7 +116,4 @@
   file:
     state: absent
     path: "{{ prev_stat.lnk_source }}"
-  when: prev_stat.exists is defined and prev_stat.exists
-
-- debug:
-    msg: "{{ prev_stat }}"
+  when: prev_stat.stat.exists is defined and prev_stat.stat.exists == true
