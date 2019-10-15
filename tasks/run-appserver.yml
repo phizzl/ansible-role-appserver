@@ -1,0 +1,109 @@
+---
+- debug:
+    msg: "Deploying app {{ app.name }}"
+
+- set_fact:
+    app_target: "{{ app.build_dir }}/{{ app.target_dirname | default(app.name + '-' + ansible_date_time.iso8601_basic_short) }}"
+    app_prev_build_link: "{{ app.build_dir }}/{{ app.name }}-prev"
+    app_next_build_link: "{{ app.build_dir }}/{{ app.name }}-next"
+    app_current_build_link: "{{ app.build_dir }}/{{ app.name }}-current"
+    app_templates: []
+    app_symlinks: []
+    app_shared_directories: []
+
+- name: Remove app target if exists
+  file:
+    state: absent
+    path: "{{ app_target }}"
+
+- name: (Re)create app target
+  file:
+    state: directory
+    path: "{{ app_target }}"
+    recurse: yes
+
+- name: Extract artifact
+  unarchive:
+    src: "{{ app.artifact }}"
+    dest: "{{ app_target }}"
+  when: app.artifact is defined
+
+- name: Clone from Git repository
+  git:
+    repo: "{{ app.repo }}"
+    dest: "{{ app_target }}"
+    force: yes
+    accept_hostkey: yes
+    version: "{{ app.version | default('HEAD') }}"
+    key_file: "{{ app.key_file | default(omit) }}"
+  when: app.repo is defined
+
+- name: Determine templates to copy to app
+  set_fact:
+    app_templates: "{{ app_templates }} + [ { 'src': '{{ item.src }}', 'dest': '{{ app_target }}/{{ item.dest }}', 'mode': '{{ item.mode | default(omit) }}' } ]"
+  loop: "{{ app.templates }}"
+
+- name: Copy templates to app
+  template: "{{ item }}"
+  loop: "{{ app_templates }}"
+
+- name: Determine symlinks to create
+  set_fact:
+    app_symlinks: "{{ app_symlinks }} + [ { 'source': '{{ item.source }}', 'target': '{{ app_target }}/{{ item.target }}', 'create': '{{ item.create | default('no') }}', 'force': '{{ item.force | default('no') }}' } ]"
+  loop: "{{ app.symlinks }}"
+
+- name: Create symlink source
+  file:
+    state: directory
+    recurse: true
+    path: "{{ item.source }}"
+  when: item.create is defined and item.create == "yes"
+  loop: "{{ app_symlinks }}"
+
+- name: Removing symlink targets if forced
+  file:
+    state: absent
+    path: "{{ item.target }}"
+  loop: "{{ app_symlinks }}"
+  when: item.force is defined and item.force == "yes"
+
+- name: Create symlinks
+  file:
+    state: link
+    path: "{{ item.target }}"
+    src: "{{ item.source }}"
+    force: "{{ item.force }}"
+  loop: "{{ app_symlinks }}"
+
+- name: Run pre publish commands
+  loop: "{{ app.pre_publish_commands }}"
+  shell: "{{ item }}"
+  when: app.pre_publish_commands is defined
+  args:
+    chdir: "{{ app_target }}"
+
+- name: Creating next build link
+  file:
+    state: link
+    path: "{{ app_next_build_link }}"
+    src: "{{ app_target }}"
+
+- name: Removing prev symlink
+  file:
+    state: absent
+    path: "{{ app_prev_build_link }}"
+
+- name: Changing version symlinks
+  shell: "{{ item }}"
+  args:
+    chdir: "{{ app.build_dir }}"
+  loop:
+    - "if [ -e {{ app_current_build_link }} ]; then mv -vf {{ app_current_build_link }} {{ app_prev_build_link }}; fi"
+    - "mv {{ app_next_build_link }} {{ app_current_build_link }}"
+
+- name: Run post publish commands
+  loop: "{{ app.post_publish_commands }}"
+  shell: "{{ item }}"
+  when: app.post_publish_commands is defined
+  args:
+    chdir: "{{ app_target }}"

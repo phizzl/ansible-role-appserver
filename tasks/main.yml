@@ -1,0 +1,6 @@
+---
+- name: Create archive
+  include_tasks: run-appserver.yml
+  loop: "{{ appserver_targets }}"
+  loop_control:
+    loop_var: app
