@@ -41,7 +41,7 @@
 - name: Determine templates to copy to app
   set_fact:
     app_templates: "{{ app_templates }} + [ { 'src': '{{ item.src }}', 'dest': '{{ app_target }}/{{ item.dest }}', 'mode': '{{ item.mode | default(omit) }}' } ]"
-  loop: "{{ app.templates }}"
+  loop: "{{ app.templates | default([]) }}"
 
 - name: Copy templates to app
   template: "{{ item }}"
@@ -50,7 +50,7 @@
 - name: Determine symlinks to create
   set_fact:
     app_symlinks: "{{ app_symlinks }} + [ { 'source': '{{ item.source }}', 'target': '{{ app_target }}/{{ item.target }}', 'create': '{{ item.create | default('no') }}', 'force': '{{ item.force | default('no') }}' } ]"
-  loop: "{{ app.symlinks }}"
+  loop: "{{ app.symlinks | default([]) }}"
 
 - name: Create symlink source
   file:
