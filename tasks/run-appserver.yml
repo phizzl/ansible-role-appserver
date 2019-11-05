@@ -25,6 +25,7 @@
 - name: Extract artifact
   unarchive:
     src: "{{ app.artifact }}"
+    remote_src: "{{ app.remote_src | default('no') }}"
     dest: "{{ app_target }}"
   when: app.artifact is defined
 

@@ -19,6 +19,7 @@ This list contains the definitions for all applications to build
 |----------|-------------|----------|---------|
 | `name` | The name of the application. It must not contain any special characters. | yes | / |
 | `artifact` | The absolute path to a tgz artifact that contains the application | no | / |
+| `remote_src` | Set to `yes` to indicate the archived file is already on the remote system and not local to the Ansible controller. | no | no |
 | `repo` | The repository to clone the apllication from | no | / |
 | `version` | The Git branch/version | no | "HEAD" |
 | `key_file` | The private key file to use for GIT | no | / |
