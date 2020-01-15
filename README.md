@@ -23,6 +23,7 @@ This list contains the definitions for all applications to build
 | `repo` | The repository to clone the apllication from | no | / |
 | `version` | The Git branch/version | no | "HEAD" |
 | `key_file` | The private key file to use for GIT | no | / |
+| `track_submodules` | Option to track GIT submodules | no | no |
 | `build_dir` | A path to store the builds. | yes |  / |
 | `target_dirname` | Name of the subdirectory in `build_dir` to build the application | no |  `name`-`ansible_date_time.iso8601_basic_short` |
 | `templates` | List of templates to copy the application. See below for details. | no | [] |

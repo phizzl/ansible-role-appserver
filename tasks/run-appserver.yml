@@ -37,6 +37,7 @@
     accept_hostkey: yes
     version: "{{ app.version | default('HEAD') }}"
     key_file: "{{ app.key_file | default(omit) }}"
+    track_submodules: "{{ app.track_submodules | default('no') }}"
   when: app.repo is defined
 
 - name: Determine templates to copy to app
